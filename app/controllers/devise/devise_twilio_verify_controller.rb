@@ -1,7 +1,5 @@
 class Devise::DeviseTwilioVerifyController < DeviseController
-  prepend_before_action :find_resource, :only => [
-    :request_sms
-  ]
+  prepend_before_action :find_resource if @resource.blank?
   prepend_before_action :find_resource_and_require_password_checked, :only => [
     :GET_verify_twilio_verify, :POST_verify_twilio_verify
   ]
@@ -57,6 +55,7 @@ class Devise::DeviseTwilioVerifyController < DeviseController
 
   # enable 2fa
   def POST_enable_twilio_verify
+    @resource.update(mobile_phone: params[:country_code] + params[:cellphone])
     redirect_to [resource_name, :verify_twilio_verify_installation] and return
   end
 
@@ -80,9 +79,10 @@ class Devise::DeviseTwilioVerifyController < DeviseController
       return handle_invalid_token :verify_twilio_verify_installation, :not_enabled
     end
 
-    verification_check = TwilioVerifyService.verify_sms_token(@resource.mobile_phone, params[:token])
+    verification_check = TwilioVerifyService.verify_sms_token(params[:mobile_phone], params[:token])
 
     self.resource.twilio_verify_enabled = verification_check.status == 'approved'
+    self.resource.mobile_phone = params[:mobile_phone] if params[:mobile_phone].present?
 
     if verification_check.status == 'approved' && self.resource.save
       remember_device(@resource.id) if params[:remember_device].to_i == 1
