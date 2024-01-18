@@ -79,7 +79,7 @@ class Devise::DeviseTwilioVerifyController < DeviseController
       return handle_invalid_token :verify_twilio_verify_installation, :not_enabled
     end
 
-    verification_check = TwilioVerifyService.verify_sms_token(params[:mobile_phone], params[:token])
+    verification_check = TwilioVerifyService.verify_sms_token(@resource.mobile_phone, params[:token])
 
     self.resource.twilio_verify_enabled = verification_check.status == 'approved'
 
