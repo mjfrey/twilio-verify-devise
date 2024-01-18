@@ -82,7 +82,6 @@ class Devise::DeviseTwilioVerifyController < DeviseController
     verification_check = TwilioVerifyService.verify_sms_token(params[:mobile_phone], params[:token])
 
     self.resource.twilio_verify_enabled = verification_check.status == 'approved'
-    self.resource.mobile_phone = params[:mobile_phone] if params[:mobile_phone].present?
 
     if verification_check.status == 'approved' && self.resource.save
       remember_device(@resource.id) if params[:remember_device].to_i == 1
