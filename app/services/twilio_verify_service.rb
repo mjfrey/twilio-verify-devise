@@ -2,11 +2,11 @@ class TwilioVerifyService
   attr_reader :twilio_client, :twilio_account_sid, :twilio_auth_token, :twilio_verify_service_sid
 
   def self.send_sms_token(phone_number)
-    new.twilio_verify_service.verifications.create(to: e164_format(phone_number), channel: 'sms')
+    new.twilio_verify_service.verifications.create(to: phone_number, channel: 'sms')
   end
 
   def self.verify_sms_token(phone_number, token)
-    new.twilio_verify_service.verification_checks.create(to: e164_format(phone_number), code: token)
+    new.twilio_verify_service.verification_checks.create(to: phone_number, code: token)
   end
 
   def self.verify_totp_token(user, token)

@@ -45,31 +45,31 @@ class Devise::DeviseTwilioVerifyController < DeviseController
       remember_device(@resource.id) if params[:remember_device].to_i == 1
       remember_user
       record_twilio_verify_authentication
-      respond_with resource, :location => after_sign_in_path_for(@resource)
+      respond_with @resource, :location => after_sign_in_path_for(@resource)
     else
       handle_invalid_token :verify_twilio_verify, :invalid_token
     end
   end
-  
+
   def GET_enable_twilio_verify
-    render :enable_twilio_verify  
+    render :enable_twilio_verify
   end
 
   # enable 2fa
   def POST_enable_twilio_verify
-    if resource.update(twilio_verify_enabled: true)
+    if @resource.update(twilio_verify_enabled: true)
       redirect_to [resource_name, :verify_twilio_verify_installation] and return
     else
       set_flash_message(:error, :not_enabled)
-      redirect_to after_twilio_verify_enabled_path_for(resource) and return
+      redirect_to after_twilio_verify_enabled_path_for(@resource) and return
     end
   end
 
   # Disable 2FA
   def POST_disable_twilio_verify
-    resource.assign_attributes(twilio_verify_enabled: false)
-    resource.save(:validate => false)
-    redirect_to after_twilio_verify_disabled_path_for(resource)
+    @resource.assign_attributes(twilio_verify_enabled: false)
+    @resource.save(:validate => false)
+    redirect_to after_twilio_verify_disabled_path_for(@resource)
   end
 
   def GET_verify_twilio_verify_installation
@@ -93,7 +93,7 @@ class Devise::DeviseTwilioVerifyController < DeviseController
       remember_device(@resource.id) if params[:remember_device].to_i == 1
       record_twilio_verify_authentication
       set_flash_message(:notice, :enabled)
-      redirect_to after_twilio_verify_verified_path_for(resource)
+      redirect_to after_twilio_verify_verified_path_for(@resource)
     else
       if resource_class.twilio_verify_enable_qr_code
         #response = Authy::API.request_qr_code(id: resource.authy_id)
@@ -144,7 +144,7 @@ class Devise::DeviseTwilioVerifyController < DeviseController
 
   def check_resource_not_twilio_verify_enabled
     if resource.twilio_verify_enabled
-      redirect_to after_twilio_verify_verified_path_for(resource)
+      redirect_to after_twilio_verify_verified_path_for(@resource)
     end
   end
 
