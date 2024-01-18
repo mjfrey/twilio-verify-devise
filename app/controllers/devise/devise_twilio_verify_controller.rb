@@ -55,7 +55,7 @@ class Devise::DeviseTwilioVerifyController < DeviseController
 
   # enable 2fa
   def POST_enable_twilio_verify
-    @resource.update(mobile_phone: params[:country_code] + params[:cellphone])
+    @resource.update(mobile_phone: "+" + params[:country_code] + params[:cellphone])
     redirect_to [resource_name, :verify_twilio_verify_installation] and return
   end
 
