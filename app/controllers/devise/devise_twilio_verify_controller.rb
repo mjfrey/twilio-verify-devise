@@ -7,7 +7,7 @@ class Devise::DeviseTwilioVerifyController < DeviseController
   ]
 
   prepend_before_action :check_resource_not_twilio_verify_enabled, :only => [
-    :POST_verify_twilio_verify_installation
+    :GET_verify_twilio_verify_installation, :POST_verify_twilio_verify_installation
   ]
 
   prepend_before_action :authenticate_scope!, :only => [
@@ -57,12 +57,7 @@ class Devise::DeviseTwilioVerifyController < DeviseController
 
   # enable 2fa
   def POST_enable_twilio_verify
-    if @resource.update(twilio_verify_enabled: true)
-      redirect_to [resource_name, :verify_twilio_verify_installation] and return
-    else
-      set_flash_message(:error, :not_enabled)
-      redirect_to after_twilio_verify_enabled_path_for(@resource) and return
-    end
+    redirect_to [resource_name, :verify_twilio_verify_installation] and return
   end
 
   # Disable 2FA
@@ -77,7 +72,6 @@ class Devise::DeviseTwilioVerifyController < DeviseController
       #response = Authy::API.request_qr_code(id: resource.authy_id)
       #@twilio_verify_qr_code = response.qr_code
     end
-    puts "------------> GET_verify_twilio_verify_installation"
     render :verify_twilio_verify_installation
   end
 
