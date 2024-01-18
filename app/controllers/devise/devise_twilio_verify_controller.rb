@@ -7,7 +7,7 @@ class Devise::DeviseTwilioVerifyController < DeviseController
   ]
 
   prepend_before_action :check_resource_not_twilio_verify_enabled, :only => [
-    :GET_verify_twilio_verify_installation, :POST_verify_twilio_verify_installation
+    :POST_verify_twilio_verify_installation
   ]
 
   prepend_before_action :authenticate_scope!, :only => [
@@ -77,6 +77,7 @@ class Devise::DeviseTwilioVerifyController < DeviseController
       #response = Authy::API.request_qr_code(id: resource.authy_id)
       #@twilio_verify_qr_code = response.qr_code
     end
+    puts "------------> GET_verify_twilio_verify_installation"
     render :verify_twilio_verify_installation
   end
 
