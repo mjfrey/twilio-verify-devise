@@ -55,7 +55,14 @@ class Devise::DeviseTwilioVerifyController < DeviseController
 
   # enable 2fa
   def POST_enable_twilio_verify
-    @resource.update(mobile_phone: "+" + params[:country_code] + params[:cellphone])
+    totp_factor = TwilioVerifyService.setup_totp_service(@resource)
+    args = {
+      twilio_totp_factor_sid: totp_factor.sid,
+      twilio_totp_seed: totp_factor.binding['uri'],
+      mobile_phone: "+" + params[:country_code] + params[:cellphone]
+    }
+
+    @resource.update(**args)
     redirect_to [resource_name, :verify_twilio_verify_installation] and return
   end
 
@@ -67,6 +74,7 @@ class Devise::DeviseTwilioVerifyController < DeviseController
   end
 
   def GET_verify_twilio_verify_installation
+    generate_qr_code_if_needed
     if resource_class.twilio_verify_enable_qr_code
       #response = Authy::API.request_qr_code(id: resource.authy_id)
       #@twilio_verify_qr_code = response.qr_code
@@ -177,5 +185,11 @@ class Devise::DeviseTwilioVerifyController < DeviseController
     if session.delete("#{resource_name}_remember_me") == true && @resource.respond_to?(:remember_me=)
       @resource.remember_me = true
     end
+  end
+
+  def generate_qr_code_if_needed
+    # return unless resource_class.twilio_verify_enable_qr_code && resource.respond_to?(:twilio_totp_seed)
+
+    @qr_code = RQRCode::QRCode.new(resource.twilio_totp_seed).as_svg(fill: :white, module_size: 5)
   end
 end
