@@ -11,7 +11,7 @@ class TwilioVerifyService
 
   def self.verify_totp_token(user, token)
     new.twilio_verify_service_v2
-      .entities([Rails.env, user.id].join('-'))
+      .entities(user.uuid)
       .challenges
       .create(auth_payload: token, factor_sid: user.twilio_totp_factor_sid)
   end
@@ -33,7 +33,7 @@ class TwilioVerifyService
     # After user adds the app to their authenticator app, register the user by having them confirm a token
     # if this returns factor.status == 'verified', the user has been properly setup
     new.twilio_verify_service_v2
-      .entities([Rails.env, user.id].join('-'))
+      .entities(user.uuid)
       .factors(user.twilio_totp_factor_sid)
       .update(auth_payload: token)
   end
