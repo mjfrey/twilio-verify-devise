@@ -18,7 +18,7 @@ class TwilioVerifyService
 
   def self.setup_totp_service(user)
     new_factor = new.twilio_verify_service_v2
-      .entities([Rails.env, user.id].join('-'))
+      .entities(user.uuid)
       .new_factors
       .create(friendly_name: user.to_s, factor_type: 'totp')
 
