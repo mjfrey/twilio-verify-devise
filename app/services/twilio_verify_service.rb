@@ -20,7 +20,7 @@ class TwilioVerifyService
     new_factor = new.twilio_verify_service_v2
       .entities(user.uuid)
       .new_factors
-      .create(friendly_name: user.to_s, factor_type: 'totp')
+      .create(friendly_name: user.name, factor_type: 'totp')
 
     user.update(twilio_totp_factor_sid: new_factor.sid)
 
