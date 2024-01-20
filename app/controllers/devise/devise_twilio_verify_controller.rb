@@ -35,8 +35,12 @@ class Devise::DeviseTwilioVerifyController < DeviseController
     # Hack to reproduce authy functionality of being able to verify 2FA via SMS or TOTP
     # not ideal as there could be network delays, but there is currently no alternative
     if !verification_check && @resource.twilio_totp_factor_sid.present?
-      verification_check = TwilioVerifyService.verify_totp_token(@resource, params[:token])
-      verification_check = verification_check.status == 'approved'
+      begin
+        verification_check = TwilioVerifyService.verify_totp_token(@resource, params[:token])
+        verification_check = verification_check.status == 'approved'
+      rescue Twilio::REST::RestError
+        verification_check = false
+      end
     end
 
     if verification_check
