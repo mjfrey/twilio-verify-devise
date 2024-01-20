@@ -101,18 +101,18 @@ class Devise::DeviseTwilioVerifyController < DeviseController
       end
     end
 
-    self.resource.twilio_verify_enabled = verification_check.status == 'approved' || 'verified'
+    if verification_check == false
+      return handle_invalid_token :verify_twilio_verify_installation, :not_enabled
+    else
+      self.resource.twilio_verify_enabled = verification_check.status == 'approved' || 'verified'
+    end
 
-    if (verification_check.status == 'approved' || 'verified') && self.resource.save
+    if self.resource.twilio_verify_enabled && self.resource.save
       remember_device(@resource.id) if params[:remember_device].to_i == 1
       record_twilio_verify_authentication
       set_flash_message(:notice, :enabled)
       redirect_to after_twilio_verify_verified_path_for(@resource)
     else
-      if resource_class.twilio_verify_enable_qr_code
-        #response = Authy::API.request_qr_code(id: resource.authy_id)
-        #@twilio_verify_qr_code = response.qr_code
-      end
       handle_invalid_token :verify_twilio_verify_installation, :not_enabled
     end
   end
