@@ -94,7 +94,11 @@ class Devise::DeviseTwilioVerifyController < DeviseController
     begin
       verification_check = TwilioVerifyService.verify_sms_token(@resource.mobile_phone, params[:token])
     rescue Twilio::REST::RestError
-      verification_check = TwilioVerifyService.register_totp_service(@resource, params[:token])
+      begin
+        verification_check = TwilioVerifyService.register_totp_service(@resource, params[:token])
+      rescue Twilio::REST::RestError
+        verification_check = false
+      end
     end
 
     self.resource.twilio_verify_enabled = verification_check.status == 'approved' || 'verified'
