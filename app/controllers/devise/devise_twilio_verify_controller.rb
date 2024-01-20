@@ -87,11 +87,15 @@ class Devise::DeviseTwilioVerifyController < DeviseController
       return handle_invalid_token :verify_twilio_verify_installation, :not_enabled
     end
 
-    verification_check = TwilioVerifyService.verify_sms_token(@resource.mobile_phone, params[:token])
+    begin
+      verification_check = TwilioVerifyService.verify_sms_token(@resource.mobile_phone, params[:token])
+    rescue Twilio::REST::RestError
+      verification_check = TwilioVerifyService.register_totp_service(@resource, params[:token])
+    end
 
-    self.resource.twilio_verify_enabled = verification_check.status == 'approved'
+    self.resource.twilio_verify_enabled = verification_check.status == 'approved' || 'verified'
 
-    if verification_check.status == 'approved' && self.resource.save
+    if (verification_check.status == 'approved' || 'verified') && self.resource.save
       remember_device(@resource.id) if params[:remember_device].to_i == 1
       record_twilio_verify_authentication
       set_flash_message(:notice, :enabled)
@@ -188,12 +192,8 @@ class Devise::DeviseTwilioVerifyController < DeviseController
   end
 
   def generate_qr_code_if_needed
-    # return unless resource_class.twilio_verify_enable_qr_code && resource.respond_to?(:twilio_totp_seed)
+    return unless resource.respond_to?(:twilio_totp_seed)
 
-    @qr_code = RQRCode::QRCode.new(resource.twilio_totp_seed).as_svg(color: "000",
-    shape_rendering: "crispEdges",
-    module_size: 11,
-    standalone: true,
-    use_path: true)
+    @qr_code = RQRCode::QRCode.new(resource.twilio_totp_seed).as_png
   end
 end
