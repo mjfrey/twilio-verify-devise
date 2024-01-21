@@ -78,7 +78,6 @@ class Devise::DeviseTwilioVerifyController < DeviseController
   end
 
   def GET_verify_twilio_verify_installation
-    generate_qr_code_if_needed
     if resource_class.twilio_verify_enable_qr_code
       #response = Authy::API.request_qr_code(id: resource.authy_id)
       #@twilio_verify_qr_code = response.qr_code
